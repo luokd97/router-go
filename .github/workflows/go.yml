@@ -19,12 +19,20 @@ jobs:
 
     - name: Build
       run: |
-        GOOS=linux GOARCH=arm GOARM=5 go build -v -o helloworld ./...
+        GOOS=linux GOARCH=arm GOARM=5 go build -v -o helloworld main.go
         ls
 
+    - name: Write SSH key to file
+      env:
+        OPENWRT_IP: ${{ secrets.OPENWRT_IP }}
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      run: |
+        echo "$SSH_PRIVATE_KEY" > private_key
+        chmod 600 private_key
+        
     - name: Copy binary to OpenWrt device
       env:
         OPENWRT_IP: ${{ secrets.OPENWRT_IP }}
         SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
       run: |
-        scp -o StrictHostKeyChecking=no -i <(echo "$SSH_PRIVATE_KEY") helloworld root@$OPENWRT_IP:/root/
+        scp -o StrictHostKeyChecking=no -i private_key helloworld root@$OPENWRT_IP:/root/
