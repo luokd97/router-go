@@ -2,9 +2,11 @@ package main
 
 import (
     "fmt"
-    "io/ioutil"
+    "io"
     "log"
     "net/http"
+    "os"
+    "path/filepath"
 )
 
 func main() {
@@ -40,23 +42,23 @@ func uploadFileHandler(w http.ResponseWriter, r *http.Request) {
         fmt.Printf("File Size: %+v\n", handler.Size)
         fmt.Printf("MIME Header: %+v\n", handler.Header)
 
-        // 创建文件
-        tempFile, err := ioutil.TempFile("public", handler.Filename)
+        // Create a new file in the public directory
+        destFile, err := os.Create(filepath.Join("./public", filepath.Base(handler.Filename)))
         if err != nil {
-            fmt.Println(err)
+            http.Error(w, err.Error(), http.StatusInternalServerError)
+            return
         }
-        defer tempFile.Close()
+        defer destFile.Close()
 
-        // 读取文件内容
-        fileBytes, err := ioutil.ReadAll(file)
+        // Copy the file content to the new file
+        _, err = io.Copy(destFile, file)
         if err != nil {
-            fmt.Println(err)
+            http.Error(w, err.Error(), http.StatusInternalServerError)
+            return
         }
-        // 写入文件
-        tempFile.Write(fileBytes)
 
         // 返回上传成功的消息
-        fmt.Fprintf(w, "Successfully Uploaded File\n")
+        fmt.Fprintf(w, "<html><head><meta charset=\"utf-8\"><meta http-equiv=\"refresh\" content=\"0; URL=/\"></head>Successfully Uploaded File\n<p><a href=\"/\">Back to homepage</a></p></html>")
     } else {
         // 如果不是POST请求，返回上传表单
         w.Write([]byte(`
@@ -74,4 +76,3 @@ func uploadFileHandler(w http.ResponseWriter, r *http.Request) {
         `))
     }
 }
-
