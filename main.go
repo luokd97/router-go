@@ -58,7 +58,7 @@ func uploadFileHandler(w http.ResponseWriter, r *http.Request) {
         }
 
         // 返回上传成功的消息
-        fmt.Fprintf(w, "<html><head><meta charset=\"utf-8\"><meta http-equiv=\"refresh\" content=\"0; URL=/\"></head>Successfully Uploaded File\n<p><a href=\"/\">Back to homepage</a></p></html>")
+        fmt.Fprintf(w, "<!DOCTYPE html><html><head><title>Upload Successful</title></head><body><p>Successfully Uploaded File</p><button id=\"goToNewPage\">Back to homepage</button><script>const goToNewPageButton=document.getElementById('goToNewPage');goToNewPageButton.addEventListener('click',function(){window.location.href='/';});</script></body></html>")
     } else {
         // 如果不是POST请求，返回上传表单
         w.Write([]byte(`
